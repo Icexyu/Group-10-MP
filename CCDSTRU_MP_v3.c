@@ -1,6 +1,8 @@
 #include <stdio.h>
 
-#define DIM 4   /* We use indices 1 to 3 only. Index 0 is ignored. */
+#define DIM 4   
+/* We use indices 1 to 3 only. 
+Index 0 is ignored. */
 
 /* 
    A board position is represented by a row and column.
@@ -32,7 +34,7 @@ typedef struct {
 } GameState;
 
 /* ---------- Function Prototypes ---------- */
-
+/* ---------- Implemented Code ------------- */
 int inBounds(Position pos);
 int countSet(int setArr[DIM][DIM]);
 int countFree(GameState *g);
@@ -41,12 +43,14 @@ void initializeGame(GameState *g);
 void printBoard(GameState *g);
 int isValidMove(GameState *g, Position pos);
 
+/* ---------- Implemented Specs ------------ */
 void Remove(GameState *g, Position pos);
 void Replace(GameState *g, Position pos);
 void Expand(GameState *g, Position pos);
 void Update(GameState *g, Position pos);
 void NextPlayerMove(GameState *g, Position pos);
 
+/* ---------- Shows the Result ------------ */
 void printResult(GameState *g);
 void clearInputBuffer(void);
 
@@ -57,15 +61,15 @@ void clearInputBuffer(void);
    Only rows and columns from 1 to 3 are allowed.
 */
 int inBounds(Position pos) {
-    int inside;
+    int inside = 0;		// Is inside
 
-    inside = 0;
-
-    if (pos.row >= 1 && pos.row <= 3 && pos.col >= 1 && pos.col <= 3) {
-        inside = 1;
+    if (pos.row >= 1 
+	 && pos.row <= 3 
+	 && pos.col >= 1 
+	 && pos.col <= 3) {
+        inside = 1;		// Is not inside, therefore invalid placement
     }
-
-    return inside;
+    return inside;	
 }
 
 /*
@@ -113,62 +117,41 @@ int countFree(GameState *g) {
     return count;
 }
 
-/*
-   Recomputes the "over" condition based on the formal specification.
-
-   The game is over if:
-   1. There are exactly 3 free cells left, OR
-   2. val is at least 20, OR
-   3. The game is no longer in the start phase and only one player
-      still has pieces on the board.
-*/
-void recomputeOver(GameState *g) {
-    int rCount;
+void recomputeOver(GameState *g) {	// recomputes the "over" condition based
+    int rCount;						// on the formal specification
     int bCount;
     int fCount;
-
     rCount = countSet(g->R);
     bCount = countSet(g->B);
     fCount = countFree(g);
-
     g->over = 0;
 
-    if (fCount == 3) {
+    if (fCount == 3) {		// gameover if there are exactly 3 free cells left
         g->over = 1;
     }
-
-    if (g->val >= 20) {
+    if (g->val >= 20) {		// gameover if val is at least 20
         g->over = 1;
     }
-
-    if (g->start == 0) {
+    if (g->start == 0) {	// gameover if no longer in the start phase AND only one 
+    						// player still has pieces on the board (R or B)
         if ((rCount > 0 && bCount == 0) || (rCount == 0 && bCount > 0)) {
             g->over = 1;
         }
     }
 }
 
-/*
-   Initializes the game exactly according to the specification:
-   good = false
-   go = true
-   start = true
-   over = false
-   found = false
-   val = 0
-   R, B, S, T are all empty
-*/
 void initializeGame(GameState *g) {
     int i;
     int j;
-
-    g->good = 0;
-    g->go = 1;
-    g->start = 1;
-    g->over = 0;
-    g->found = 0;
-    g->val = 0;
-
+	/* Initializes the game exactly 
+	according to the specification:*/
+    g->good = 0;	// good = false
+    g->go = 1;		// go = true
+    g->start = 1;	// start = true
+    g->over = 0;	// over = false
+    g->found = 0;	// found = false
+    g->val = 0;		// val = 0			R, B, S, T are all empty
+	
     for (i = 0; i < DIM; i++) {
         for (j = 0; j < DIM; j++) {
             g->R[i][j] = 0;
@@ -179,13 +162,7 @@ void initializeGame(GameState *g) {
     }
 }
 
-/*
-   Prints the current board.
-   R = position owned by Red player
-   B = position owned by Blue player
-   . = empty cell
-*/
-void printBoard(GameState *g) {
+void printBoard(GameState *g) {	// Prints the board
     int i;
     int j;
 
@@ -194,11 +171,11 @@ void printBoard(GameState *g) {
         printf("%d ", i);
         for (j = 1; j <= 3; j++) {
             if (g->R[i][j] == 1) {
-                printf("R ");
+                printf("R ");	// R = position owned by Red player
             } else if (g->B[i][j] == 1) {
-                printf("B ");
+                printf("B ");	// B = position owned by Blue player
             } else {
-                printf(". ");
+                printf(". ");	// ". " = empty cell
             }
         }
         printf("\n");
@@ -216,9 +193,7 @@ void printBoard(GameState *g) {
    - B must choose one of B's cells
 */
 int isValidMove(GameState *g, Position pos) {
-    int valid;
-
-    valid = 0;
+    int valid = 0;
 
     if (inBounds(pos) == 1) {
         if (g->start == 1) {
@@ -245,12 +220,9 @@ int isValidMove(GameState *g, Position pos) {
 
 /*
    Remove(pos)
-
    If it is R's turn, remove pos from R.
    If it is B's turn, remove pos from B.
    In both cases, also remove pos from S and T.
-
-   This follows the formal Remove(pos) rule.
 */
 void Remove(GameState *g, Position pos) {
     if (inBounds(pos) == 1) {
@@ -339,11 +311,9 @@ void Replace(GameState *g, Position pos) {
                 g->B[pos.row][pos.col] = 0;
                 g->found = 1;
             }
-
             if (g->R[pos.row][pos.col] == 1) {
                 g->found = 1;
             }
-
             if (g->R[pos.row][pos.col] == 0) {
                 g->R[pos.row][pos.col] = 1;
             }
@@ -352,21 +322,17 @@ void Replace(GameState *g, Position pos) {
                 g->R[pos.row][pos.col] = 0;
                 g->found = 1;
             }
-
             if (g->B[pos.row][pos.col] == 1) {
                 g->found = 1;
             }
-
             if (g->B[pos.row][pos.col] == 0) {
                 g->B[pos.row][pos.col] = 1;
             }
         }
-
         if (g->found == 1 && g->S[pos.row][pos.col] == 0) {
             g->S[pos.row][pos.col] = 1;
             g->found = 0;
         }
-
         if (g->found == 1 && g->S[pos.row][pos.col] == 1 && g->T[pos.row][pos.col] == 0) {
             g->T[pos.row][pos.col] = 1;
             Expand(g, pos);
@@ -424,7 +390,6 @@ void NextPlayerMove(GameState *g, Position pos) {
     recomputeOver(g);
 
     if (g->over == 0 && inBounds(pos) == 1) {
-
         if (g->start == 1 && g->go == 1) {
             if (g->R[pos.row][pos.col] == 0 && g->B[pos.row][pos.col] == 0) {
                 g->R[pos.row][pos.col] = 1;
@@ -432,7 +397,6 @@ void NextPlayerMove(GameState *g, Position pos) {
                 g->good = 1;
             }
         }
-
         if (g->start == 1 && g->go == 0) {
             if (g->R[pos.row][pos.col] == 0 && g->B[pos.row][pos.col] == 0) {
                 g->B[pos.row][pos.col] = 1;
@@ -440,7 +404,6 @@ void NextPlayerMove(GameState *g, Position pos) {
                 g->good = 1;
             }
         }
-
         if (g->over == 0 && g->start == 0) {
             if ((g->go == 1 && g->R[pos.row][pos.col] == 1) ||
                 (g->go == 0 && g->B[pos.row][pos.col] == 1)) {
@@ -448,21 +411,17 @@ void NextPlayerMove(GameState *g, Position pos) {
                 g->good = 1;
             }
         }
-
         if (g->start == 1) {
             if (countSet(g->R) == 1 && countSet(g->B) == 1) {
                 g->start = 0;
             }
         }
-
         recomputeOver(g);
-
         if (g->over == 0 && g->good == 1) {
             g->good = !g->good;
             g->go = !g->go;
             g->val = g->val + 1;
         }
-
         recomputeOver(g);
     }
 }
@@ -495,9 +454,7 @@ void printResult(GameState *g) {
 */
 void clearInputBuffer(void) {
     int ch;
-    int done;
-
-    done = 0;
+    int done = 0;
 
     while (done == 0) {
         ch = getchar();
